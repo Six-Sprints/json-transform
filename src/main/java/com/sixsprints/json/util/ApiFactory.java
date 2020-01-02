@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class ApiFactory {
 
@@ -20,6 +21,7 @@ public class ApiFactory {
   public static <T> T create(Class<T> clazz, String baseUrl, ObjectMapper mapper) {
     Retrofit retrofit = new Retrofit.Builder()
       .baseUrl(baseUrl)
+      .addConverterFactory(ScalarsConverterFactory.create())
       .addConverterFactory(JacksonConverterFactory.create(mapper))
       .build();
     return retrofit.create(clazz);
