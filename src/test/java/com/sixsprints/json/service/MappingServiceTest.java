@@ -3,16 +3,25 @@ package com.sixsprints.json.service;
 import java.io.InputStream;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
 import com.sixsprints.json.dto.Mapping;
 import com.sixsprints.json.dto.TransformerData;
 import com.sixsprints.json.dto.TransformerResponse;
 
-public class MappingServiceTest {
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
-  @Test
-  public void shouldConvert() {
+public class MappingServiceTest extends TestCase {
+
+  public MappingServiceTest(String testName) {
+    super(testName);
+  }
+
+  public static Test suite() {
+    return new TestSuite(MappingServiceTest.class);
+  }
+
+  public void testShouldConvert() {
 
     String input = "{\n" +
       "  \"rating\": {\n" +

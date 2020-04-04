@@ -4,8 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.util.CollectionUtils;
-
 import com.bazaarvoice.jolt.JsonUtils;
 import com.bazaarvoice.jolt.utils.JoltUtils;
 import com.google.common.collect.Lists;
@@ -55,7 +53,7 @@ public class TransformerUtil {
 
   public static Object readSingle(Object source, String key) {
     LinkedList<Object> values = read(source, key);
-    if (CollectionUtils.isEmpty(values)) {
+    if (values == null || values.isEmpty()) {
       return null;
     }
     return values.get(0);

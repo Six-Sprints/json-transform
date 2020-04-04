@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.util.CollectionUtils;
-
 import com.bazaarvoice.jolt.Chainr;
 import com.bazaarvoice.jolt.JsonUtils;
 import com.sixsprints.json.dto.Mapping;
@@ -25,7 +23,7 @@ public class MappingService {
     Chainr chainr = Chainr.fromSpec(spec);
     Map<String, Object> output = (Map<String, Object>) chainr.transform(input);
     List<TransformerMetaInfo> metaChanges = new ArrayList<TransformerMetaInfo>();
-    if (!CollectionUtils.isEmpty(mapping.getTransformerData())) {
+    if (mapping.getTransformerData() != null && !mapping.getTransformerData().isEmpty()) {
       for (TransformerData transformerData : mapping.getTransformerData()) {
         SpecTransformer transformer = SpecFactory.getInstance(transformerData.getSpecTransformerKey());
         List<TransformerChange> changes = transformer.transform(input, output, transformerData.getContext());
