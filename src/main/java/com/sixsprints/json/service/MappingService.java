@@ -16,9 +16,22 @@ import com.sixsprints.json.util.TransformerUtil;
 
 public class MappingService {
 
+  private static final String ROOT_MAPPING = "[" +
+    "  {" +
+    "    \"operation\": \"shift\"," +
+    "    \"spec\": {" +
+    "      \"{{ROOT_ELEMENT}}\": {" +
+    "        \"*\": \"&\"" +
+    "      }" +
+    "    }" +
+    "  }" +
+    "]";
+
   @SuppressWarnings("unchecked")
   public static TransformerResponse convert(Mapping mapping, String inputMessage) {
-    Object spec = JsonUtils.jsonToObject(mapping.getSpecJsonStream());
+
+    Object spec = generateSpec(mapping);
+
     Map<String, Object> input = JsonUtils.jsonToMap(inputMessage);
     Chainr chainr = Chainr.fromSpec(spec);
     Map<String, Object> output = (Map<String, Object>) chainr.transform(input);
@@ -33,6 +46,25 @@ public class MappingService {
       }
     }
     return TransformerResponse.builder().output(output).transformerMetaInfo(metaChanges).build();
+  }
+
+  private static Object generateSpec(Mapping mapping) {
+
+    if (!isBlank(mapping.getRootElement())) {
+      return JsonUtils.jsonToObject(ROOT_MAPPING.replace("{{ROOT_ELEMENT}}", mapping.getRootElement()));
+    }
+
+    if (!isBlank(mapping.getSpecJsonString())) {
+      return JsonUtils.jsonToObject(mapping.getSpecJsonString());
+    }
+
+    return JsonUtils.jsonToObject(mapping.getSpecJsonStream());
+  }
+
+  private static boolean isBlank(String string) {
+
+    return string == null || string.isEmpty();
+
   }
 
 }
