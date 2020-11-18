@@ -40,11 +40,16 @@ public class MappingService {
   public static TransformerResponse convert(Mapping mapping, String inputMessage) {
 
     Object spec = generateSpec(mapping);
+    List<TransformerMetaInfo> metaChanges = new ArrayList<TransformerMetaInfo>();
 
     Map<String, Object> input = JsonUtils.jsonToMap(inputMessage);
     Chainr chainr = Chainr.fromSpec(spec);
+
+    if (!isBlank(mapping.getExtractValue())) {
+      return TransformerResponse.builder().output(chainr.transform(input)).transformerMetaInfo(metaChanges).build();
+    }
+
     Map<String, Object> output = (Map<String, Object>) chainr.transform(input);
-    List<TransformerMetaInfo> metaChanges = new ArrayList<TransformerMetaInfo>();
     if (mapping.getTransformerData() != null && !mapping.getTransformerData().isEmpty()) {
       for (TransformerData transformerData : mapping.getTransformerData()) {
         SpecTransformer transformer = SpecFactory.getInstance(transformerData.getSpecTransformerKey());

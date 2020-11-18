@@ -37,17 +37,21 @@ public class MappingServiceTest extends TestCase {
     String fileName = "/simple-test-spec.json";
     List<TransformerData> data = null;
     Mapping mapping = mapping(fileName, data);
-
     TransformerResponse response = MappingService.convert(mapping, input);
-
     System.out.println(response);
+  }
 
+  public void testShouldConvertFromExtractValue() {
+
+    String input = "{\"data\":true,\"success\":false,\"errorMessage\": \"this is an error\",\"errorCode\":10,\"meta\":null}";
+
+    TransformerResponse response = MappingService.convert(Mapping.builder().extractValue("data").build(), input);
+    Boolean result = (Boolean) response.getOutput();
+    System.out.println(result);
   }
 
   private Mapping mapping(String fileName, List<TransformerData> data) {
-
     InputStream stream = this.getClass().getResourceAsStream(fileName);
-
     return Mapping.builder().specJsonStream(stream).transformerData(data).build();
   }
 
