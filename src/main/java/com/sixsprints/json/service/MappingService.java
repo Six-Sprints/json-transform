@@ -27,6 +27,15 @@ public class MappingService {
     "  }" +
     "]";
 
+  private static final String EXTRACT_VALUE = "[" +
+    "  {" +
+    "    \"operation\": \"shift\"," +
+    "    \"spec\": {" +
+    "      \"{{EXTRACT_VALUE}}\": \"\"" +
+    "    }" +
+    "  }" +
+    "]";
+
   @SuppressWarnings("unchecked")
   public static TransformerResponse convert(Mapping mapping, String inputMessage) {
 
@@ -52,6 +61,10 @@ public class MappingService {
 
     if (!isBlank(mapping.getRootElement())) {
       return JsonUtils.jsonToObject(ROOT_MAPPING.replace("{{ROOT_ELEMENT}}", mapping.getRootElement()));
+    }
+
+    if (!isBlank(mapping.getExtractValue())) {
+      return JsonUtils.jsonToObject(EXTRACT_VALUE.replace("{{EXTRACT_VALUE}}", mapping.getExtractValue()));
     }
 
     if (!isBlank(mapping.getSpecJsonString())) {
