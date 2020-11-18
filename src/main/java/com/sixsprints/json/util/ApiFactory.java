@@ -6,6 +6,7 @@ import org.joda.time.DateTimeZone;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.primitives.Primitives;
 import com.sixsprints.json.dto.Mapping;
 import com.sixsprints.json.dto.TransformerResponse;
 import com.sixsprints.json.exception.ApiException;
@@ -40,14 +41,22 @@ public class ApiFactory {
     return create(clazz, baseUrl, mapper);
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> T makeCallAndTransform(Call<String> call, Class<T> clazz, Mapping mapping)
     throws IOException, ApiException {
     Response<String> response = call.execute();
     if (response.isSuccessful()) {
       TransformerResponse convert = MappingService.convert(mapping, response.body());
+      if (isPrimitive(clazz)) {
+        return (T) convert.getOutput();
+      }
       return mapper.convertValue(convert.getOutput(), clazz);
     }
     throw ApiException.builder().response(response).error("Response was unsuccessfull").build();
+  }
+
+  private static <T> boolean isPrimitive(Class<T> clazz) {
+    return Primitives.isWrapperType(clazz);
   }
 
 }
