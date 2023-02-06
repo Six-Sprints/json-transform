@@ -1,8 +1,8 @@
 package com.sixsprints.json.util;
 
 import java.io.IOException;
-
-import org.joda.time.DateTimeZone;
+import java.time.ZoneId;
+import java.util.TimeZone;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,12 +12,14 @@ import com.sixsprints.json.dto.TransformerResponse;
 import com.sixsprints.json.exception.ApiException;
 import com.sixsprints.json.service.MappingService;
 
+import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+@Slf4j
 public class ApiFactory {
 
   private static final ObjectMapper mapper;
@@ -25,7 +27,7 @@ public class ApiFactory {
   static {
     mapper = new ObjectMapper();
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    mapper.setTimeZone(DateTimeZone.forID("+05:30").toTimeZone());
+    mapper.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
   }
 
   public static <T> T create(Class<T> clazz, String baseUrl, ObjectMapper mapper) {
@@ -46,6 +48,8 @@ public class ApiFactory {
     throws IOException, ApiException {
     Response<String> response = call.execute();
     if (response.isSuccessful()) {
+      String responseBody = response.body();
+      log.info("Response from API: {}", responseBody);
       TransformerResponse convert = MappingService.convert(mapping, response.body());
       if (isPrimitive(clazz)) {
         return (T) convert.getOutput();
