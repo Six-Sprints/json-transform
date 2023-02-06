@@ -3,24 +3,15 @@ package com.sixsprints.json.service;
 import java.io.InputStream;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import com.sixsprints.json.dto.Mapping;
 import com.sixsprints.json.dto.TransformerData;
 import com.sixsprints.json.dto.TransformerResponse;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+public class MappingServiceTest {
 
-public class MappingServiceTest extends TestCase {
-
-  public MappingServiceTest(String testName) {
-    super(testName);
-  }
-
-  public static Test suite() {
-    return new TestSuite(MappingServiceTest.class);
-  }
-
+  @Test
   public void testShouldConvert() {
 
     String input = "{\n" +
@@ -41,6 +32,7 @@ public class MappingServiceTest extends TestCase {
     System.out.println(response);
   }
 
+  @Test
   public void testShouldConvertFromExtractValue() {
 
     String input = "{\"data\":true,\"success\":false,\"errorMessage\": \"this is an error\",\"errorCode\":10,\"meta\":null}";
