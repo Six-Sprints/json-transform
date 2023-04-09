@@ -9,7 +9,7 @@
 	<name>json-transform</name>
 	<description>Json Transform API</description>
 	<properties>
-		<java.version>11</java.version>
+		<java.version>17</java.version>
 		<lombok.version>1.18.26</lombok.version>
 		<jolt.version>0.1.7</jolt.version>
 		<guava.version>31.0.1-jre</guava.version>
