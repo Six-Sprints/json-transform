@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sixsprints</groupId>
 	<artifactId>json-transform</artifactId>
-	<version>0.1.6</version>
+	<version>0.1.8</version>
 	<name>json-transform</name>
 	<description>Json Transform API</description>
 	<properties>
