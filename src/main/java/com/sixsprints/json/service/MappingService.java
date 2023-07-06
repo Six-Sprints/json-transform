@@ -67,6 +67,10 @@ public class MappingService {
 
   private static Object generateSpec(Mapping mapping) {
 
+    if (mapping == null) {
+      return null;
+    }
+
     if (!isBlank(mapping.getRootElement())) {
       return JsonUtils.jsonToObject(ROOT_MAPPING.replace("{{ROOT_ELEMENT}}", mapping.getRootElement()));
     }

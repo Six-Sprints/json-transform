@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Primitives;
@@ -63,6 +64,18 @@ public class ApiFactory {
         return (T) convert.getOutput();
       }
       return mapper.convertValue(convert.getOutput(), clazz);
+    }
+    throw ApiException.builder().response(response).error("Response was unsuccessfull").build();
+  }
+
+  public static <T> T makeCallAndTransform(Call<String> call, TypeReference<T> type, Mapping mapping)
+    throws IOException, ApiException {
+    Response<String> response = call.execute();
+    if (response.isSuccessful()) {
+      String responseBody = response.body();
+      log.info("Response from API: {}", responseBody);
+      TransformerResponse convert = MappingService.convert(mapping, response.body());
+      return mapper.convertValue(convert.getOutput(), type);
     }
     throw ApiException.builder().response(response).error("Response was unsuccessfull").build();
   }
