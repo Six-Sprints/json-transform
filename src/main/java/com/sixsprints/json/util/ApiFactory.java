@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.Retrofit.Builder;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
@@ -31,12 +32,19 @@ public class ApiFactory {
   }
 
   public static <T> T create(Class<T> clazz, String baseUrl, ObjectMapper mapper) {
-    Retrofit retrofit = new Retrofit.Builder()
+    Retrofit retrofit = retrofit(baseUrl, mapper).build();
+    return retrofit.create(clazz);
+  }
+
+  public static Builder retrofit(String baseUrl, ObjectMapper mapper) {
+    return new Retrofit.Builder()
       .baseUrl(baseUrl)
       .addConverterFactory(ScalarsConverterFactory.create())
-      .addConverterFactory(JacksonConverterFactory.create(mapper))
-      .build();
-    return retrofit.create(clazz);
+      .addConverterFactory(JacksonConverterFactory.create(mapper));
+  }
+
+  public static Builder retrofit(String baseUrl) {
+    return retrofit(baseUrl, mapper);
   }
 
   public static <T> T create(Class<T> clazz, String baseUrl) {
