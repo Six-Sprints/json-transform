@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.time.ZoneId;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Primitives;
 import com.sixsprints.json.dto.Mapping;
@@ -55,33 +57,40 @@ public class ApiFactory {
   @SuppressWarnings("unchecked")
   public static <T> T makeCallAndTransform(Call<String> call, Class<T> clazz, Mapping mapping)
     throws IOException, ApiException {
-    Response<String> response = call.execute();
-    if (response.isSuccessful()) {
-      String responseBody = response.body();
-      log.info("Response from API: {}", responseBody);
-      TransformerResponse convert = MappingService.convert(mapping, response.body());
-      if (isPrimitive(clazz)) {
-        return (T) convert.getOutput();
-      }
-      return mapper.convertValue(convert.getOutput(), clazz);
+    TransformerResponse response = makeCall(call, mapping);
+    if (isPrimitive(clazz)) {
+      return (T) response.getOutput();
     }
-    throw ApiException.builder().response(response).error("Response was unsuccessfull").build();
+    if (response.getOutput() instanceof String) {
+      return mapper.readValue(response.getOutput().toString(), clazz);
+    }
+    return mapper.convertValue(response.getOutput(), clazz);
   }
 
   public static <T> T makeCallAndTransform(Call<String> call, TypeReference<T> type, Mapping mapping)
     throws IOException, ApiException {
+    TransformerResponse response = makeCall(call, mapping);
+    if (response.getOutput() instanceof String) {
+      return mapper.readValue(response.getOutput().toString(), type);
+    }
+
+    return mapper.convertValue(response.getOutput(), type);
+  }
+
+  private static <T> boolean isPrimitive(Class<T> clazz) {
+    return Primitives.isWrapperType(clazz);
+  }
+
+  private static <T> TransformerResponse makeCall(Call<String> call, Mapping mapping)
+    throws IOException, JsonProcessingException, JsonMappingException, ApiException {
     Response<String> response = call.execute();
     if (response.isSuccessful()) {
       String responseBody = response.body();
       log.info("Response from API: {}", responseBody);
       TransformerResponse convert = MappingService.convert(mapping, response.body());
-      return mapper.convertValue(convert.getOutput(), type);
+      return convert;
     }
     throw ApiException.builder().response(response).error("Response was unsuccessfull").build();
-  }
-
-  private static <T> boolean isPrimitive(Class<T> clazz) {
-    return Primitives.isWrapperType(clazz);
   }
 
 }
