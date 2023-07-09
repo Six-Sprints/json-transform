@@ -7,6 +7,7 @@ import java.util.TimeZone;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Primitives;
@@ -74,6 +75,15 @@ public class ApiFactory {
       return mapper.readValue(response.getOutput().toString(), type);
     }
 
+    return mapper.convertValue(response.getOutput(), type);
+  }
+
+  public static <T> T makeCallAndTransform(Call<String> call, JavaType type, Mapping mapping)
+    throws IOException, ApiException {
+    TransformerResponse response = makeCall(call, mapping);
+    if (response.getOutput() instanceof String) {
+      return mapper.readValue(response.getOutput().toString(), type);
+    }
     return mapper.convertValue(response.getOutput(), type);
   }
 
