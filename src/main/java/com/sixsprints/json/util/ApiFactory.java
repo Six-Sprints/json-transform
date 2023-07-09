@@ -16,7 +16,6 @@ import com.sixsprints.json.dto.TransformerResponse;
 import com.sixsprints.json.exception.ApiException;
 import com.sixsprints.json.service.MappingService;
 
-import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -24,7 +23,6 @@ import retrofit2.Retrofit.Builder;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-@Slf4j
 public class ApiFactory {
 
   private static final ObjectMapper mapper;
@@ -62,25 +60,22 @@ public class ApiFactory {
     if (isPrimitive(clazz)) {
       return (T) response.getOutput();
     }
-    if (response.getOutput() instanceof String) {
-      return mapper.readValue(response.getOutput().toString(), clazz);
-    }
-    return mapper.convertValue(response.getOutput(), clazz);
+    return convertViaMapper(mapper.getTypeFactory().constructType(clazz), response);
   }
 
   public static <T> T makeCallAndTransform(Call<String> call, TypeReference<T> type, Mapping mapping)
     throws IOException, ApiException {
-    TransformerResponse response = makeCall(call, mapping);
-    if (response.getOutput() instanceof String) {
-      return mapper.readValue(response.getOutput().toString(), type);
-    }
-
-    return mapper.convertValue(response.getOutput(), type);
+    return makeCallAndTransform(call, mapper.getTypeFactory().constructType(type), mapping);
   }
 
   public static <T> T makeCallAndTransform(Call<String> call, JavaType type, Mapping mapping)
     throws IOException, ApiException {
     TransformerResponse response = makeCall(call, mapping);
+    return convertViaMapper(type, response);
+  }
+
+  private static <T> T convertViaMapper(JavaType type, TransformerResponse response)
+    throws JsonProcessingException, JsonMappingException {
     if (response.getOutput() instanceof String) {
       return mapper.readValue(response.getOutput().toString(), type);
     }
@@ -95,10 +90,7 @@ public class ApiFactory {
     throws IOException, JsonProcessingException, JsonMappingException, ApiException {
     Response<String> response = call.execute();
     if (response.isSuccessful()) {
-      String responseBody = response.body();
-      log.info("Response from API: {}", responseBody);
-      TransformerResponse convert = MappingService.convert(mapping, response.body());
-      return convert;
+      return MappingService.convert(mapping, response.body());
     }
     throw ApiException.builder().response(response).error("Response was unsuccessfull").build();
   }
