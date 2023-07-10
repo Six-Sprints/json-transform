@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Primitives;
+import com.sixsprints.json.dto.ApiCall;
 import com.sixsprints.json.dto.Mapping;
 import com.sixsprints.json.dto.TransformerResponse;
 import com.sixsprints.json.exception.ApiException;
@@ -25,12 +26,14 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class ApiFactory {
 
-  private static final ObjectMapper mapper;
+  private static final ObjectMapper MAPPER;
 
   static {
-    mapper = new ObjectMapper();
-    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    mapper.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+    MAPPER = new ObjectMapper();
+    MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    MAPPER.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+    MAPPER.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+    MAPPER.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
   }
 
   public static <T> T create(Class<T> clazz, String baseUrl, ObjectMapper mapper) {
@@ -46,35 +49,35 @@ public class ApiFactory {
   }
 
   public static Builder retrofit(String baseUrl) {
-    return retrofit(baseUrl, mapper);
+    return retrofit(baseUrl, MAPPER);
   }
 
   public static <T> T create(Class<T> clazz, String baseUrl) {
-    return create(clazz, baseUrl, mapper);
+    return create(clazz, baseUrl, MAPPER);
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> T makeCallAndTransform(Call<String> call, Class<T> clazz, Mapping mapping)
+  public static <T> T makeCallAndTransform(ApiCall apiCall, Class<T> clazz)
     throws IOException, ApiException {
-    TransformerResponse response = makeCall(call, mapping);
+    TransformerResponse response = makeCall(apiCall.getCall(), apiCall.getMapping());
     if (isPrimitive(clazz)) {
       return (T) response.getOutput();
     }
-    return convertViaMapper(mapper.getTypeFactory().constructType(clazz), response);
+    return convertViaMapper(getMapper(apiCall), getMapper(apiCall).getTypeFactory().constructType(clazz), response);
   }
 
-  public static <T> T makeCallAndTransform(Call<String> call, TypeReference<T> type, Mapping mapping)
+  public static <T> T makeCallAndTransform(ApiCall apiCall, TypeReference<T> type)
     throws IOException, ApiException {
-    return makeCallAndTransform(call, mapper.getTypeFactory().constructType(type), mapping);
+    return makeCallAndTransform(apiCall, getMapper(apiCall).getTypeFactory().constructType(type));
   }
 
-  public static <T> T makeCallAndTransform(Call<String> call, JavaType type, Mapping mapping)
+  public static <T> T makeCallAndTransform(ApiCall apiCall, JavaType type)
     throws IOException, ApiException {
-    TransformerResponse response = makeCall(call, mapping);
-    return convertViaMapper(type, response);
+    TransformerResponse response = makeCall(apiCall.getCall(), apiCall.getMapping());
+    return convertViaMapper(getMapper(apiCall), type, response);
   }
 
-  private static <T> T convertViaMapper(JavaType type, TransformerResponse response)
+  private static <T> T convertViaMapper(ObjectMapper mapper, JavaType type, TransformerResponse response)
     throws JsonProcessingException, JsonMappingException {
 
     if (response == null || response.getOutput() == null) {
@@ -100,6 +103,10 @@ public class ApiFactory {
       return MappingService.convert(mapping, response.body());
     }
     throw ApiException.builder().response(response).error("Response was unsuccessfull").build();
+  }
+
+  private static ObjectMapper getMapper(ApiCall apiCall) {
+    return apiCall.getMapper() == null ? MAPPER : apiCall.getMapper();
   }
 
 }
