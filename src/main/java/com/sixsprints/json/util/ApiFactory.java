@@ -76,7 +76,14 @@ public class ApiFactory {
 
   private static <T> T convertViaMapper(JavaType type, TransformerResponse response)
     throws JsonProcessingException, JsonMappingException {
+
+    if (response == null || response.getOutput() == null) {
+      return null;
+    }
     if (response.getOutput() instanceof String) {
+      if (response.getOutput().toString() == null || response.getOutput().toString().equals("")) {
+        return null;
+      }
       return mapper.readValue(response.getOutput().toString(), type);
     }
     return mapper.convertValue(response.getOutput(), type);
