@@ -42,6 +42,9 @@ public class MappingService {
     Object spec = generateSpec(mapping);
     List<TransformerMetaInfo> metaChanges = new ArrayList<TransformerMetaInfo>();
 
+    if (spec == null) {
+      return TransformerResponse.builder().output(inputMessage).transformerMetaInfo(metaChanges).build();
+    }
     Map<String, Object> input = JsonUtils.jsonToMap(inputMessage);
     Chainr chainr = Chainr.fromSpec(spec);
 
@@ -64,6 +67,10 @@ public class MappingService {
 
   private static Object generateSpec(Mapping mapping) {
 
+    if (mapping == null) {
+      return null;
+    }
+
     if (!isBlank(mapping.getRootElement())) {
       return JsonUtils.jsonToObject(ROOT_MAPPING.replace("{{ROOT_ELEMENT}}", mapping.getRootElement()));
     }
@@ -76,7 +83,11 @@ public class MappingService {
       return JsonUtils.jsonToObject(mapping.getSpecJsonString());
     }
 
-    return JsonUtils.jsonToObject(mapping.getSpecJsonStream());
+    if (mapping.getSpecJsonStream() != null) {
+      return JsonUtils.jsonToObject(mapping.getSpecJsonStream());
+    }
+
+    return null;
   }
 
   private static boolean isBlank(String string) {
