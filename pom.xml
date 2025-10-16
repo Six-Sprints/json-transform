@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sixsprints</groupId>
 	<artifactId>json-transform</artifactId>
-	<version>0.1.18</version>
+	<version>1.0.0</version>
 	<name>json-transform</name>
 	<description>Json Transform API</description>
 	<properties>
@@ -16,7 +16,7 @@
 		<retrofit.version>3.0.0</retrofit.version>
 		<slf4j.version>2.0.17</slf4j.version>
 		<junit.version>6.0.0</junit.version>
-		<maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
+		<maven.compiler.plugin.version>3.11.0</maven.compiler.plugin.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 	<dependencies>

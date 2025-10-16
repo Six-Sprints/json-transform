@@ -9,7 +9,7 @@ A utility library for creating Retrofit service instances with automatic JSON tr
 Add the following dependency to your `build.gradle`:
 
 ```gradle
-implementation 'com.github.Six-Sprints:json-transform:0.1.18'
+implementation 'com.github.Six-Sprints:json-transform:1.0.0'
 ```
 
 And ensure you have the required repositories:
