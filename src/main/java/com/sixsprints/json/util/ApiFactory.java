@@ -3,6 +3,7 @@ package com.sixsprints.json.util;
 import java.io.IOException;
 import java.time.ZoneId;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -17,6 +18,7 @@ import com.sixsprints.json.dto.TransformerResponse;
 import com.sixsprints.json.exception.ApiException;
 import com.sixsprints.json.service.MappingService;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -42,10 +44,12 @@ public class ApiFactory {
   }
 
   public static Builder retrofit(String baseUrl, ObjectMapper mapper) {
-    return new Retrofit.Builder()
-      .baseUrl(baseUrl)
-      .addConverterFactory(ScalarsConverterFactory.create())
-      .addConverterFactory(JacksonConverterFactory.create(mapper));
+    OkHttpClient client = new OkHttpClient.Builder().connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS).writeTimeout(30, TimeUnit.SECONDS).build();
+
+    return new Retrofit.Builder().client(client).baseUrl(baseUrl)
+        .addConverterFactory(ScalarsConverterFactory.create())
+        .addConverterFactory(JacksonConverterFactory.create(mapper));
   }
 
   public static Builder retrofit(String baseUrl) {
@@ -58,27 +62,28 @@ public class ApiFactory {
 
   @SuppressWarnings("unchecked")
   public static <T> T makeCallAndTransform(ApiCall apiCall, Class<T> clazz)
-    throws IOException, ApiException {
+      throws IOException, ApiException {
     TransformerResponse response = makeCall(apiCall.getCall(), apiCall.getMapping());
     if (isPrimitive(clazz)) {
       return (T) response.getOutput();
     }
-    return convertViaMapper(getMapper(apiCall), getMapper(apiCall).getTypeFactory().constructType(clazz), response);
+    return convertViaMapper(getMapper(apiCall),
+        getMapper(apiCall).getTypeFactory().constructType(clazz), response);
   }
 
   public static <T> T makeCallAndTransform(ApiCall apiCall, TypeReference<T> type)
-    throws IOException, ApiException {
+      throws IOException, ApiException {
     return makeCallAndTransform(apiCall, getMapper(apiCall).getTypeFactory().constructType(type));
   }
 
   public static <T> T makeCallAndTransform(ApiCall apiCall, JavaType type)
-    throws IOException, ApiException {
+      throws IOException, ApiException {
     TransformerResponse response = makeCall(apiCall.getCall(), apiCall.getMapping());
     return convertViaMapper(getMapper(apiCall), type, response);
   }
 
-  private static <T> T convertViaMapper(ObjectMapper mapper, JavaType type, TransformerResponse response)
-    throws JsonProcessingException, JsonMappingException {
+  private static <T> T convertViaMapper(ObjectMapper mapper, JavaType type,
+      TransformerResponse response) throws JsonProcessingException, JsonMappingException {
 
     if (response == null || response.getOutput() == null) {
       return null;
@@ -97,12 +102,12 @@ public class ApiFactory {
   }
 
   private static <T> TransformerResponse makeCall(Call<String> call, Mapping mapping)
-    throws IOException, JsonProcessingException, JsonMappingException, ApiException {
+      throws IOException, JsonProcessingException, JsonMappingException, ApiException {
     Response<String> response = call.execute();
     if (response.isSuccessful()) {
       return MappingService.convert(mapping, response.body());
     }
-    throw ApiException.builder().response(response).error("Response was unsuccessfull").build();
+    throw ApiException.builder().response(response).error("Response was unsuccessful").build();
   }
 
   private static ObjectMapper getMapper(ApiCall apiCall) {

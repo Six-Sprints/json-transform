@@ -16,25 +16,29 @@ import com.sixsprints.json.util.TransformerUtil;
 
 public class MappingService {
 
-  private static final String ROOT_MAPPING = "[" +
-    "  {" +
-    "    \"operation\": \"shift\"," +
-    "    \"spec\": {" +
-    "      \"{{ROOT_ELEMENT}}\": {" +
-    "        \"*\": \"&\"" +
-    "      }" +
-    "    }" +
-    "  }" +
-    "]";
+  private static final String ROOT_MAPPING = """
+    [
+      {
+        "operation": "shift",
+        "spec": {
+          "{{ROOT_ELEMENT}}": {
+            "*": "&"
+          }
+        }
+      }
+    ]
+    """;
 
-  private static final String EXTRACT_VALUE = "[" +
-    "  {" +
-    "    \"operation\": \"shift\"," +
-    "    \"spec\": {" +
-    "      \"{{EXTRACT_VALUE}}\": \"\"" +
-    "    }" +
-    "  }" +
-    "]";
+  private static final String EXTRACT_VALUE = """
+    [
+      {
+        "operation": "shift",
+        "spec": {
+          "{{EXTRACT_VALUE}}": ""
+        }
+      }
+    ]
+    """;
 
   @SuppressWarnings("unchecked")
   public static TransformerResponse convert(Mapping mapping, String inputMessage) {

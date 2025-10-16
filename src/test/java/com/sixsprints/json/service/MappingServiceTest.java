@@ -34,16 +34,8 @@ public class MappingServiceTest {
   @Test
   public void testShouldConvert() {
 
-    String input = "{\n" +
-      "  \"rating\": {\n" +
-      "    \"primary\": {\n" +
-      "      \"value\": 3\n" +
-      "    },\n" +
-      "    \"quality\": {\n" +
-      "      \"value\": 3\n" +
-      "    }\n" +
-      "  }\n" +
-      "}";
+    String input = "{\n" + "  \"rating\": {\n" + "    \"primary\": {\n" + "      \"value\": 3\n"
+        + "    },\n" + "    \"quality\": {\n" + "      \"value\": 3\n" + "    }\n" + "  }\n" + "}";
 
     String fileName = "/simple-test-spec.json";
     List<TransformerData> data = null;
@@ -55,9 +47,11 @@ public class MappingServiceTest {
   @Test
   public void testShouldConvertFromExtractValue() {
 
-    String input = "{\"data\":true,\"success\":false,\"errorMessage\": \"this is an error\",\"errorCode\":10,\"meta\":null}";
+    String input =
+        "{\"data\":true,\"success\":false,\"errorMessage\": \"this is an error\",\"errorCode\":10,\"meta\":null}";
 
-    TransformerResponse response = MappingService.convert(Mapping.builder().extractValue("data").build(), input);
+    TransformerResponse response =
+        MappingService.convert(Mapping.builder().extractValue("data").build(), input);
     Boolean result = (Boolean) response.getOutput();
     System.out.println(result);
   }
@@ -65,19 +59,21 @@ public class MappingServiceTest {
   @Test
   public void mapperShouldConvert() throws JsonMappingException, JsonProcessingException {
 
-    String input = "[{\"token\":\"19441\",\"symbol\":\"AHLEAST-BL\",\"name\":\"AHLEAST\",\"expiry\":\"\",\"strike\":\"-1.000000\",\"lotsize\":\"1\",\"instrumenttype\":\"\",\"exch_seg\":\"NSE\",\"tick_size\":\"5.000000\"},{\"token\":\"8521\",\"symbol\":\"SPRL-SM\",\"name\":\"SPRL\",\"expiry\":\"\",\"strike\":\"-1.000000\",\"lotsize\":\"1600\",\"instrumenttype\":\"\",\"exch_seg\":\"NSE\",\"tick_size\":\"5.000000\"},{\"token\":\"10950\",\"symbol\":\"TMB-BL\",\"name\":\"TMB\",\"expiry\":\"\",\"strike\":\"-1.000000\",\"lotsize\":\"1\",\"instrumenttype\":\"\",\"exch_seg\":\"NSE\",\"tick_size\":\"5.000000\"}]";
+    String input =
+        "[{\"token\":\"19441\",\"symbol\":\"AHLEAST-BL\",\"name\":\"AHLEAST\",\"expiry\":\"\",\"strike\":\"-1.000000\",\"lotsize\":\"1\",\"instrumenttype\":\"\",\"exch_seg\":\"NSE\",\"tick_size\":\"5.000000\"},{\"token\":\"8521\",\"symbol\":\"SPRL-SM\",\"name\":\"SPRL\",\"expiry\":\"\",\"strike\":\"-1.000000\",\"lotsize\":\"1600\",\"instrumenttype\":\"\",\"exch_seg\":\"NSE\",\"tick_size\":\"5.000000\"},{\"token\":\"10950\",\"symbol\":\"TMB-BL\",\"name\":\"TMB\",\"expiry\":\"\",\"strike\":\"-1.000000\",\"lotsize\":\"1\",\"instrumenttype\":\"\",\"exch_seg\":\"NSE\",\"tick_size\":\"5.000000\"}]";
 
     System.out.println(input);
-    TypeReference<List<InstrumentDto>> type = new TypeReference<List<InstrumentDto>>() {
-    };
+    TypeReference<List<InstrumentDto>> type = new TypeReference<List<InstrumentDto>>() {};
     List<InstrumentDto> instruments = mapper.readValue(input, type);
     System.out.println(instruments);
   }
 
   @Test
-  public void mapperShouldConvertEmptyStringToList() throws JsonMappingException, JsonProcessingException {
+  public void mapperShouldConvertEmptyStringToList()
+      throws JsonMappingException, JsonProcessingException {
 
-    String input = "{\"success\":false,\"message\":\"Invalid Token\",\"errorCode\":\"AG8001\",\"data\":\"\"}";
+    String input =
+        "{\"success\":false,\"message\":\"Invalid Token\",\"errorCode\":\"AG8001\",\"data\":\"\"}";
     System.out.println(input);
 
     JavaType listType = FACTORY.constructCollectionType(List.class, InstrumentDto.class);
