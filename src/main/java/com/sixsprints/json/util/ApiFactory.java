@@ -17,7 +17,7 @@ import com.sixsprints.json.dto.Mapping;
 import com.sixsprints.json.dto.TransformerResponse;
 import com.sixsprints.json.exception.ApiException;
 import com.sixsprints.json.service.MappingService;
-
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Response;
@@ -26,6 +26,7 @@ import retrofit2.Retrofit.Builder;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
+@Slf4j
 public class ApiFactory {
 
   private static final ObjectMapper MAPPER;
@@ -103,10 +104,35 @@ public class ApiFactory {
 
   private static <T> TransformerResponse makeCall(Call<String> call, Mapping mapping)
       throws IOException, JsonProcessingException, JsonMappingException, ApiException {
-    Response<String> response = call.execute();
-    if (response.isSuccessful()) {
-      return MappingService.convert(mapping, response.body());
+
+    // Log request details
+    okhttp3.Request request = call.request();
+    log.info("Making API Call: {} {}", request.method(), request.url());
+    log.debug("Request Headers: {}", request.headers());
+    if (request.body() != null) {
+      log.debug("Request Content-Type: {}", request.body().contentType());
     }
+
+    // Execute the call
+    Response<String> response = call.execute();
+
+    // Log response details
+    log.info("API Response: {} - Status: {}", request.url(), response.code());
+    log.debug("Response Headers: {}", response.headers());
+
+    if (response.isSuccessful()) {
+      String responseBody = response.body();
+      log.debug("Response Body: {}", responseBody);
+
+      TransformerResponse transformerResponse = MappingService.convert(mapping, responseBody);
+      log.debug("Transformed Response: {}", transformerResponse.getOutput());
+
+      return transformerResponse;
+    }
+
+    String errorBody =
+        response.errorBody() != null ? response.errorBody().string() : "No error body";
+    log.error("API Call Failed - Status: {}, Error: {}", response.code(), errorBody);
     throw ApiException.builder().response(response).error("Response was unsuccessful").build();
   }
 
